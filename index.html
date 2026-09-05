@@ -1,597 +1,972 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0f172a">
-<title>Validador BIN • Apple Pay</title>
+  <meta charset="UTF-8">
 
-<style>
-*{box-sizing:border-box}
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+  >
 
-body{
-  margin:0;
-  background:#0f172a;
-  color:#f8fafc;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif
-}
+  <meta name="theme-color" content="#070b14">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-.app{
-  max-width:560px;
-  margin:auto;
-  padding:24px 16px 45px
-}
+  <title>Validador BIN</title>
 
-.logo{
-  text-align:center;
-  font-size:46px;
-  margin:8px 0
-}
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-h1{
-  text-align:center;
-  margin:0;
-  font-size:27px
-}
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
+      background: #070b14;
+      color: #f5f7fb;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Arial,
+        sans-serif;
+    }
 
-.sub{
-  text-align:center;
-  color:#94a3b8;
-  margin:7px 0 24px
-}
+    body {
+      padding: 20px 14px 40px;
+    }
 
-.box,.card{
-  background:#1e293b;
-  border:1px solid #334155;
-  border-radius:20px;
-  padding:18px;
-  margin-bottom:15px
-}
+    .container {
+      width: 100%;
+      max-width: 760px;
+      margin: auto;
+    }
 
-label{
-  display:block;
-  color:#cbd5e1;
-  font-size:14px;
-  margin-bottom:9px
-}
+    .header {
+      text-align: center;
+      margin: 20px 0 24px;
+    }
 
-.form{
-  display:flex;
-  gap:9px
-}
+    .header h1 {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 800;
+    }
 
-input{
-  min-width:0;
-  flex:1;
-  border:1px solid #475569;
-  border-radius:13px;
-  padding:15px;
-  font-size:18px;
-  background:#0f172a;
-  color:white;
-  outline:none
-}
+    .header p {
+      margin: 8px 0 0;
+      color: #8e99aa;
+      font-size: 14px;
+    }
 
-button{
-  border:0;
-  border-radius:13px;
-  padding:0 18px;
-  font-weight:700;
-  font-size:15px;
-  background:white;
-  color:#111827
-}
+    .card {
+      background: #101722;
+      border: 1px solid #1d2838;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 15px;
+      box-shadow: 0 10px 35px rgba(0,0,0,.18);
+    }
 
-button:active{
-  transform:scale(.97)
-}
+    .search {
+      display: flex;
+      gap: 10px;
+    }
 
-.title{
-  font-size:19px;
-  font-weight:800;
-  margin-bottom:14px
-}
+    input {
+      flex: 1;
+      min-width: 0;
+      height: 52px;
+      border-radius: 13px;
+      border: 1px solid #293548;
+      background: #080d16;
+      color: white;
+      padding: 0 15px;
+      font-size: 17px;
+      outline: none;
+    }
 
-.row{
-  display:flex;
-  justify-content:space-between;
-  gap:15px;
-  padding:12px 0;
-  border-bottom:1px solid #334155
-}
+    input:focus {
+      border-color: #5d8cff;
+    }
 
-.row:last-child{
-  border-bottom:0
-}
+    button {
+      height: 52px;
+      border: 0;
+      border-radius: 13px;
+      padding: 0 19px;
+      background: #346cff;
+      color: white;
+      font-weight: 700;
+      font-size: 15px;
+      cursor: pointer;
+    }
 
-.row span{
-  color:#94a3b8
-}
+    button:active {
+      transform: scale(.98);
+    }
 
-.row strong{
-  text-align:right
-}
+    .hint {
+      color: #7f8a9d;
+      font-size: 12px;
+      margin-top: 10px;
+    }
 
-.methods{
-  display:grid;
-  gap:10px
-}
+    .status {
+      display: none;
+      padding: 13px;
+      border-radius: 12px;
+      margin-top: 14px;
+      font-size: 14px;
+    }
 
-.method{
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:13px;
-  border:1px solid #475569;
-  border-radius:15px;
-  background:#172033
-}
+    .status.show {
+      display: block;
+    }
 
-.icon{
-  width:40px;
-  height:40px;
-  border-radius:11px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  background:#0f172a;
-  font-size:20px
-}
+    .status.info {
+      background: #101f38;
+      color: #a9c7ff;
+    }
 
-.method-content{
-  flex:1
-}
+    .status.error {
+      background: #35151a;
+      color: #ff9ea9;
+    }
 
-.method-name{
-  font-weight:800
-}
+    .status.success {
+      background: #12301f;
+      color: #8ff0b0;
+    }
 
-.method-info{
-  color:#94a3b8;
-  font-size:12px;
-  margin-top:3px
-}
+    .section-title {
+      font-size: 17px;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
 
-.badge{
-  padding:6px 8px;
-  border-radius:8px;
-  font-size:10px;
-  font-weight:800;
-  white-space:nowrap
-}
+    .result {
+      display: none;
+    }
 
-.confirmed{
-  background:#14532d;
-  color:#bbf7d0
-}
+    .result.show {
+      display: block;
+    }
 
-.notconfirmed{
-  background:#713f12;
-  color:#fde68a
-}
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
 
-.unknown{
-  background:#334155;
-  color:#cbd5e1
-}
+    .item {
+      background: #0a101a;
+      border: 1px solid #1c2737;
+      border-radius: 12px;
+      padding: 12px;
+      min-width: 0;
+    }
 
-.info{
-  margin-top:14px;
-  padding:14px;
-  border-radius:14px;
-  background:#172033;
-  color:#cbd5e1;
-  font-size:13px;
-  line-height:1.5
-}
+    .label {
+      display: block;
+      color: #748096;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 5px;
+    }
 
-.error{
-  color:#fecaca
-}
+    .value {
+      font-size: 14px;
+      font-weight: 650;
+      word-break: break-word;
+    }
 
-.loading{
-  text-align:center;
-  color:#cbd5e1
-}
+    .verification {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
 
-.small{
-  color:#64748b;
-  font-size:12px;
-  text-align:center;
-  line-height:1.5;
-  margin-top:18px
-}
+    .verification-item {
+      background: #0a101a;
+      border: 1px solid #1c2737;
+      border-radius: 12px;
+      padding: 14px 10px;
+      text-align: center;
+    }
 
-@media(max-width:430px){
-  .form{
-    flex-direction:column
-  }
+    .verification-item .icon {
+      font-size: 24px;
+      margin-bottom: 7px;
+    }
 
-  button{
-    height:48px
-  }
-}
-</style>
+    .verification-item .name {
+      color: #8894a8;
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
+
+    .verification-item .state {
+      font-weight: 800;
+      font-size: 13px;
+    }
+
+    .unknown {
+      color: #ffcc72;
+    }
+
+    .confirmed {
+      color: #71e39b;
+    }
+
+    .not-confirmed {
+      color: #ff858f;
+    }
+
+    .source {
+      color: #8c98aa;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .source strong {
+      color: #cbd4e2;
+    }
+
+    .footer {
+      text-align: center;
+      color: #657083;
+      font-size: 11px;
+      line-height: 1.5;
+      margin-top: 22px;
+    }
+
+    .database-info {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: #8290a5;
+      font-size: 12px;
+      margin-top: 12px;
+    }
+
+    .badge {
+      background: #172237;
+      border: 1px solid #263653;
+      border-radius: 20px;
+      padding: 5px 9px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 550px) {
+      .search {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .verification {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .verification {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<main class="app">
+<div class="container">
 
-<div class="logo">💳</div>
+  <header class="header">
+    <h1>🔎 Validador BIN</h1>
+    <p>Consulta pública de informações do BIN/IIN</p>
+  </header>
 
-<h1>Validador BIN</h1>
+  <section class="card">
 
-<div class="sub">
-Consulta de BIN e informações de Apple Pay
+    <div class="section-title">
+      Consultar BIN
+    </div>
+
+    <div class="search">
+      <input
+        id="binInput"
+        type="text"
+        inputmode="numeric"
+        maxlength="8"
+        placeholder="Digite 6 a 8 números"
+        autocomplete="off"
+      >
+
+      <button id="searchButton">
+        Consultar
+      </button>
+    </div>
+
+    <div class="hint">
+      Digite somente os primeiros 6 a 8 dígitos. Nunca informe número completo do cartão, CVV ou senha.
+    </div>
+
+    <div id="status" class="status"></div>
+
+    <div class="database-info">
+      <span id="databaseStatus">
+        Carregando base...
+      </span>
+
+      <span class="badge" id="databaseCount">
+        0 BINs
+      </span>
+    </div>
+
+  </section>
+
+  <section id="result" class="result">
+
+    <div class="card">
+
+      <div class="section-title">
+        📋 Informações do BIN
+      </div>
+
+      <div class="grid">
+
+        <div class="item">
+          <span class="label">BIN consultada</span>
+          <span class="value" id="resultBin">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Bandeira</span>
+          <span class="value" id="resultScheme">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Tipo</span>
+          <span class="value" id="resultType">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Categoria</span>
+          <span class="value" id="resultCategory">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">País</span>
+          <span class="value" id="resultCountry">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Moeda</span>
+          <span class="value" id="resultCurrency">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Emissor</span>
+          <span class="value" id="resultIssuer">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Produto</span>
+          <span class="value" id="resultProduct">—</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-title">
+        🏦 Instituição
+      </div>
+
+      <div class="grid">
+
+        <div class="item">
+          <span class="label">Nome</span>
+          <span class="value" id="institutionName">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Tipo</span>
+          <span class="value" id="institutionType">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Código</span>
+          <span class="value" id="institutionCode">—</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Situação</span>
+          <span class="value" id="institutionStatus">—</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-title">
+        🍎 Apple Pay
+      </div>
+
+      <div class="grid">
+
+        <div class="item">
+          <span class="label">Compatibilidade</span>
+          <span class="value" id="applePay">Desconhecido</span>
+        </div>
+
+        <div class="item">
+          <span class="label">Fonte</span>
+          <span class="value" id="applePaySource">Não confirmado</span>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-title">
+        🔐 Métodos de verificação
+      </div>
+
+      <div class="verification">
+
+        <div class="verification-item">
+          <div class="icon">💬</div>
+          <div class="name">SMS</div>
+          <div class="state unknown" id="sms">Desconhecido</div>
+        </div>
+
+        <div class="verification-item">
+          <div class="icon">📱</div>
+          <div class="name">Aplicativo</div>
+          <div class="state unknown" id="app">Desconhecido</div>
+        </div>
+
+        <div class="verification-item">
+          <div class="icon">☎️</div>
+          <div class="name">Ligação</div>
+          <div class="state unknown" id="phone">Desconhecido</div>
+        </div>
+
+      </div>
+
+      <div class="hint">
+        O método de autenticação do Apple Pay não pode ser determinado
+        com segurança apenas pelo BIN. O resultado só deve ser marcado
+        como confirmado quando houver uma fonte confiável.
+      </div>
+
+    </div>
+
+    <div class="card">
+
+      <div class="section-title">
+        📚 Fonte e atualização
+      </div>
+
+      <div class="source">
+
+        <div>
+          <strong>Fonte do registro:</strong>
+          <span id="source">—</span>
+        </div>
+
+        <br>
+
+        <div>
+          <strong>Última atualização:</strong>
+          <span id="updated">—</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <div class="footer">
+    Este sistema consulta somente informações públicas.
+    Não informe dados completos de cartão, CVV, senha, OTP ou códigos SMS.
+    <br><br>
+    Validador BIN — base local JSON.
+  </div>
+
 </div>
 
-<section class="box">
-
-<label for="bin">Digite a BIN</label>
-
-<div class="form">
-
-<input
- id="bin"
- inputmode="numeric"
- maxlength="8"
- placeholder="Ex.: 424242"
- autocomplete="off">
-
-<button id="go">Consultar</button>
-
-</div>
-
-</section>
-
-<section id="output"></section>
-
-<div class="small">
-Use somente BINs de 6 a 8 dígitos.
-Não informe número completo de cartão, CVV,
-senha ou código SMS.
-</div>
-
-</main>
 
 <script>
 
-const $ = id => document.getElementById(id);
+  /*
+   * ============================================================
+   * CONFIGURAÇÃO
+   * ============================================================
+   */
 
-/*
-====================================================
-BASE DE VERIFICAÇÃO
-====================================================
+  const DATABASE_URL = "./bins.json";
 
-IMPORTANTE:
-
-Os registros abaixo são apenas exemplos.
-
-O site NÃO deve afirmar que uma BIN aceita SMS,
-aplicativo ou ligação sem uma fonte confiável.
-
-Para adicionar um registro confirmado, use:
-
-{
-  bin:"123456",
-  applePay:"Sim",
-  sms:"Confirmado",
-  app:"Não confirmado",
-  phone:"Não confirmado",
-  source:"Fonte confiável"
-}
-
-*/
-
-const verificationDatabase = {
+  let binDatabase = {};
 
   /*
-  Exemplo de estrutura:
+   * ============================================================
+   * ELEMENTOS
+   * ============================================================
+   */
 
-  "123456":{
-    applePay:"Sim",
-    sms:"Confirmado",
-    app:"Não confirmado",
-    phone:"Não confirmado",
-    source:"Fonte/documentação"
+  const binInput = document.getElementById("binInput");
+  const searchButton = document.getElementById("searchButton");
+
+  const statusBox = document.getElementById("status");
+  const resultBox = document.getElementById("result");
+
+  const databaseStatus = document.getElementById("databaseStatus");
+  const databaseCount = document.getElementById("databaseCount");
+
+
+  /*
+   * ============================================================
+   * STATUS
+   * ============================================================
+   */
+
+  function showStatus(message, type = "info") {
+
+    statusBox.textContent = message;
+
+    statusBox.className = "status show " + type;
+
   }
 
-  */
 
-};
+  function hideStatus() {
 
-/*
-====================================================
-FUNÇÕES
-====================================================
-*/
+    statusBox.className = "status";
 
-function esc(v){
-
-  return String(v ?? "Não informado")
-  .replace(/[&<>"']/g,m=>({
-    "&":"&amp;",
-    "<":"&lt;",
-    ">":"&gt;",
-    '"':"&quot;",
-    "'":"&#039;"
-  }[m]));
-
-}
-
-function status(value){
-
-  if(value === "Confirmado"){
-    return `<span class="badge confirmed">CONFIRMADO</span>`;
   }
 
-  if(value === "Não confirmado"){
-    return `<span class="badge notconfirmed">NÃO CONFIRMADO</span>`;
-  }
 
-  return `<span class="badge unknown">DESCONHECIDO</span>`;
+  /*
+   * ============================================================
+   * CARREGAR BASE JSON
+   * ============================================================
+   */
 
-}
+  async function loadDatabase() {
 
-function method(icon,name,value,description){
+    databaseStatus.textContent = "Carregando base...";
 
-  return `
+    try {
 
-    <div class="method">
-
-      <div class="icon">${icon}</div>
-
-      <div class="method-content">
-
-        <div class="method-name">
-          ${name}
-        </div>
-
-        <div class="method-info">
-          ${description}
-        </div>
-
-      </div>
-
-      ${status(value)}
-
-    </div>
-
-  `;
-
-}
-
-/*
-====================================================
-CONSULTA
-====================================================
-*/
-
-async function consult(){
-
-  const bin =
-    $("bin").value.replace(/\D/g,"");
-
-  if(bin.length < 6 || bin.length > 8){
-
-    $("output").innerHTML = `
-
-      <div class="card error">
-
-        Digite uma BIN válida com 6 a 8 números.
-
-      </div>
-
-    `;
-
-    return;
-  }
-
-  $("output").innerHTML = `
-
-    <div class="card loading">
-
-      🔎 Consultando BIN...
-
-    </div>
-
-  `;
-
-  try{
-
-    /*
-    Consulta informações públicas da BIN.
-    */
-
-    const response = await fetch(
-      "https://lookup.binlist.net/" +
-      encodeURIComponent(bin),
-      {
-        headers:{
-          "Accept-Version":"3"
+      const response = await fetch(
+        DATABASE_URL + "?v=" + Date.now(),
+        {
+          cache: "no-store"
         }
+      );
+
+      if (!response.ok) {
+
+        throw new Error(
+          "Não foi possível carregar bins.json"
+        );
+
       }
-    );
 
-    if(!response.ok){
+      const data = await response.json();
 
-      throw new Error(
-        "API HTTP " + response.status
+      if (
+        !data ||
+        typeof data !== "object" ||
+        Array.isArray(data)
+      ) {
+
+        throw new Error(
+          "Formato inválido da base"
+        );
+
+      }
+
+      binDatabase = data;
+
+      const total = Object.keys(binDatabase).length;
+
+      databaseStatus.textContent =
+        "Base local carregada";
+
+      databaseCount.textContent =
+        total.toLocaleString("pt-BR") + " BINs";
+
+    }
+
+    catch (error) {
+
+      console.error(error);
+
+      binDatabase = {};
+
+      databaseStatus.textContent =
+        "Erro ao carregar base";
+
+      databaseCount.textContent =
+        "0 BINs";
+
+      showStatus(
+        "Não foi possível carregar bins.json. Verifique se o arquivo está na raiz do GitHub.",
+        "error"
       );
 
     }
 
-    const d = await response.json();
-
-    /*
-    Procura a BIN na nossa base de
-    informações confirmadas.
-    */
-
-    const verification =
-      verificationDatabase[bin] || {};
-
-    const applePay =
-      verification.applePay || "Desconhecido";
-
-    const sms =
-      verification.sms || "Desconhecido";
-
-    const app =
-      verification.app || "Desconhecido";
-
-    const phone =
-      verification.phone || "Desconhecido";
-
-    const source =
-      verification.source ||
-      "Nenhuma fonte cadastrada";
-
-    $("output").innerHTML = `
-
-      <div class="card">
-
-        <div class="title">
-          📊 Informações da BIN
-        </div>
-
-        <div class="row">
-          <span>BIN</span>
-          <strong>${esc(bin)}</strong>
-        </div>
-
-        <div class="row">
-          <span>Bandeira</span>
-          <strong>${esc(d.scheme)}</strong>
-        </div>
-
-        <div class="row">
-          <span>Tipo</span>
-          <strong>${esc(d.type)}</strong>
-        </div>
-
-        <div class="row">
-          <span>Banco / emissor</span>
-          <strong>${esc(d.bank?.name)}</strong>
-        </div>
-
-        <div class="row">
-          <span>País</span>
-          <strong>${esc(d.country?.name)}</strong>
-        </div>
-
-      </div>
+  }
 
 
-      <div class="card">
+  /*
+   * ============================================================
+   * LIMPAR BIN
+   * ============================================================
+   */
 
-        <div class="title">
-          🍎 Apple Pay
-        </div>
+  function normalizeBin(value) {
 
-        <div class="row">
-
-          <span>Compatibilidade conhecida</span>
-
-          <strong>
-            ${esc(applePay)}
-          </strong>
-
-        </div>
-
-      </div>
-
-
-      <div class="card">
-
-        <div class="title">
-          🔐 Método de verificação
-        </div>
-
-        <div class="methods">
-
-          ${method(
-            "💬",
-            "SMS",
-            sms,
-            "Código enviado por mensagem"
-          )}
-
-          ${method(
-            "📱",
-            "Aplicativo",
-            app,
-            "Aprovação no aplicativo do emissor"
-          )}
-
-          ${method(
-            "📞",
-            "Ligação",
-            phone,
-            "Confirmação por telefone"
-          )}
-
-        </div>
-
-        <div class="info">
-
-          <strong>Fonte:</strong>
-          ${esc(source)}
-
-          <br><br>
-
-          ⚠️ O método de verificação não é
-          determinado somente pela BIN.
-
-          Quando não houver confirmação,
-          o resultado será mostrado como
-          <strong>DESCONHECIDO</strong>.
-
-        </div>
-
-      </div>
-
-    `;
-
-  }catch(error){
-
-    console.error(error);
-
-    $("output").innerHTML = `
-
-      <div class="card error">
-
-        ❌ Não foi possível consultar essa BIN agora.
-
-        <div class="info">
-
-          A consulta pública da BIN não respondeu.
-          Tente novamente em alguns instantes.
-
-        </div>
-
-      </div>
-
-    `;
+    return String(value)
+      .replace(/\D/g, "")
+      .slice(0, 8);
 
   }
 
-}
 
-$("go").addEventListener(
-  "click",
-  consult
-);
+  /*
+   * ============================================================
+   * BUSCAR BIN EXATO
+   * ============================================================
+   */
 
-$("bin").addEventListener(
-  "keydown",
-  e=>{
-    if(e.key === "Enter"){
-      consult();
+  function findExactBin(bin) {
+
+    return binDatabase[bin] || null;
+
+  }
+
+
+  /*
+   * ============================================================
+   * BUSCAR BIN POR PREFIXO
+   *
+   * Exemplo:
+   *
+   * usuário digita 47327012
+   *
+   * tenta:
+   *
+   * 47327012
+   * 4732701
+   * 473270
+   *
+   * ============================================================
+   */
+
+  function findBin(bin) {
+
+    for (
+      let length = bin.length;
+      length >= 6;
+      length--
+    ) {
+
+      const prefix = bin.slice(0, length);
+
+      if (binDatabase[prefix]) {
+
+        return {
+          key: prefix,
+          data: binDatabase[prefix]
+        };
+
+      }
+
     }
+
+    return null;
+
   }
-);
+
+
+  /*
+   * ============================================================
+   * TEXTO SEGURO
+   * ============================================================
+   */
+
+  function safeValue(value, fallback = "Desconhecido") {
+
+    if (
+      value === null ||
+      value === undefined ||
+      value === ""
+    ) {
+
+      return fallback;
+
+    }
+
+    return String(value);
+
+  }
+
+
+  /*
+   * ============================================================
+   * ESTADO DE VERIFICAÇÃO
+   * ============================================================
+   */
+
+  function setVerification(elementId, value) {
+
+    const element =
+      document.getElementById(elementId);
+
+    const normalized =
+      safeValue(value);
+
+    element.textContent =
+      normalized;
+
+    element.classList.remove(
+      "unknown",
+      "confirmed",
+      "not-confirmed"
+    );
+
+    if (
+      normalized.toLowerCase().includes("confirmado")
+    ) {
+
+      element.classList.add("confirmed");
+
+    }
+    else if (
+      normalized.toLowerCase().includes("não")
+    ) {
+
+      element.classList.add("not-confirmed");
+
+    }
+    else {
+
+      element.classList.add("unknown");
+
+    }
+
+  }
+
+
+  /*
+   * ============================================================
+   * MOSTRAR RESULTADO
+   * ============================================================
+   */
+
+  function displayResult(bin, record, matchedKey) {
+
+    document.getElementById("resultBin").textContent =
+      bin;
+
+    document.getElementById("resultScheme").textContent =
+      safeValue(record.scheme);
+
+    document.getElementById("resultType").textContent =
+      safeValue(record.type);
+
+    document.getElementById("resultCategory").textContent =
+      safeValue(record.category);
+
+    document.getElementById("resultCountry").textContent =
+      safeValue(record.country);
+
+    document.getElementById("resultCurrency").textContent =
+      safeValue(record.currency);
+
+    document.getElementById("resultIssuer").textContent =
+      safeValue(record.issuer);
+
+    document.getElementById("resultProduct").textContent =
+      safeValue(record.product);
+
+    document.getElementById("institutionName").textContent =
+      safeValue(record.institution);
+
+    document.getElementById("institutionType").textContent =
+      safeValue(record.institutionType);
+
+    document.getElementById("institutionCode").textContent =
+      safeValue(record.institutionCode);
+
+    document.getElementById("institutionStatus").textContent =
+      safeValue(record.institutionStatus);
+
+    document.getElementById("applePay").textContent =
+      safeValue(record.applePay);
+
+    document.getElementById("applePaySource").textContent =
+      safeValue(record.applePaySource);
+
+    setVerification(
+      "sms",
+      record.sms
+    );
+
+    setVerification(
+      "app",
+      record.app
+    );
+
+    setVerification(
+      "phone",
+      record.phone
+    );
+
+    document.getElementById("source").textContent =
+      safeValue(record.source);
+
+    document.getElementById("updated").textContent =
+      safeValue(record.updated);
+
+    resultBox.classList.add("show");
+
+    if (matchedKey !== bin) {
+
+      showStatus(
+        "Encontrado pelo prefixo BIN " + matchedKey + ".",
+        "success"
+      );
+
+    }
+    else {
+
+      showStatus(
+        "BIN encontrada na base local.",
+        "success"
+      );
+
+    }
+
+  }
+
+
+  /*
+   * ============================================================
+   * CONSULTAR
+   * ============================================================
+   */
+
+  function searchBin() {
+
+    const bin =
+      normalizeBin(binInput.value);
+
+    binInput.value = bin;
+
+    resultBox.classList.remove("show");
+
+    if (bin.length < 6) {
+
+      showStatus(
+        "Digite pelo menos 6 dígitos.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    const result =
+      findBin(bin);
+
+    if (!result) {
+
+      showStatus(
+        "BIN não encontrada na base local.",
+        "error"
+      );
+
+      return;
+
+    }
+
+    displayResult(
+      bin,
+      result.data,
+      result.key
+    );
+
+  }
+
+
+  /*
+   * ============================================================
+   * EVENTOS
+   * ============================================================
+   */
+
+  searchButton.addEventListener(
+    "click",
+    searchBin
+  );
+
+
+  binInput.addEventListener(
+    "input",
+    function () {
+
+      this.value =
+        normalizeBin(this.value);
+
+    }
+  );
+
+
+  binInput.addEventListener(
+    "keydown",
+    function (event) {
+
+      if (event.key === "Enter") {
+
+        searchBin();
+
+      }
+
+    }
+  );
+
+
+  /*
+   * ============================================================
+   * INICIALIZAÇÃO
+   * ============================================================
+   */
+
+  loadDatabase();
 
 </script>
 
