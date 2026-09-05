@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0f172a">
-<title>Validador BIN</title>
+<title>Validador BIN • Apple Pay</title>
 
 <style>
 *{box-sizing:border-box}
@@ -31,7 +31,7 @@ body{
 h1{
   text-align:center;
   margin:0;
-  font-size:28px
+  font-size:27px
 }
 
 .sub{
@@ -40,7 +40,7 @@ h1{
   margin:7px 0 24px
 }
 
-.box,.result{
+.box,.card{
   background:#1e293b;
   border:1px solid #334155;
   border-radius:20px;
@@ -72,17 +72,13 @@ input{
   outline:none
 }
 
-input:focus{
-  border-color:#94a3b8
-}
-
 button{
   border:0;
   border-radius:13px;
   padding:0 18px;
   font-weight:700;
   font-size:15px;
-  background:#fff;
+  background:white;
   color:#111827
 }
 
@@ -90,7 +86,7 @@ button:active{
   transform:scale(.97)
 }
 
-.section-title{
+.title{
   font-size:19px;
   font-weight:800;
   margin-bottom:14px
@@ -118,58 +114,71 @@ button:active{
 
 .methods{
   display:grid;
-  gap:10px;
-  margin-top:15px
+  gap:10px
 }
 
 .method{
-  border:1px solid #475569;
-  border-radius:15px;
-  padding:14px;
   display:flex;
   align-items:center;
   gap:12px;
+  padding:13px;
+  border:1px solid #475569;
+  border-radius:15px;
   background:#172033
 }
 
 .icon{
-  width:42px;
-  height:42px;
-  border-radius:12px;
+  width:40px;
+  height:40px;
+  border-radius:11px;
   display:flex;
-  align-items:center;
   justify-content:center;
-  font-size:22px;
+  align-items:center;
   background:#0f172a;
-  flex-shrink:0
+  font-size:20px
 }
 
-.method-title{
-  font-weight:800;
-  margin-bottom:3px
+.method-content{
+  flex:1
 }
 
-.method-text{
+.method-name{
+  font-weight:800
+}
+
+.method-info{
   color:#94a3b8;
-  font-size:13px;
-  line-height:1.35
+  font-size:12px;
+  margin-top:3px
 }
 
 .badge{
-  margin-left:auto;
-  padding:6px 9px;
-  border-radius:9px;
-  font-size:11px;
+  padding:6px 8px;
+  border-radius:8px;
+  font-size:10px;
   font-weight:800;
-  white-space:nowrap;
+  white-space:nowrap
+}
+
+.confirmed{
+  background:#14532d;
+  color:#bbf7d0
+}
+
+.notconfirmed{
+  background:#713f12;
+  color:#fde68a
+}
+
+.unknown{
   background:#334155;
-  color:#e2e8f0
+  color:#cbd5e1
 }
 
 .info{
-  margin-top:15px;
+  margin-top:14px;
   padding:14px;
-  border-radius:15px;
+  border-radius:14px;
   background:#172033;
   color:#cbd5e1;
   font-size:13px;
@@ -182,15 +191,14 @@ button:active{
 
 .loading{
   text-align:center;
-  color:#cbd5e1;
-  padding:10px
+  color:#cbd5e1
 }
 
 .small{
-  font-size:12px;
   color:#64748b;
-  line-height:1.5;
+  font-size:12px;
   text-align:center;
+  line-height:1.5;
   margin-top:18px
 }
 
@@ -202,10 +210,6 @@ button:active{
   button{
     height:48px
   }
-
-  .badge{
-    font-size:10px
-  }
 }
 </style>
 </head>
@@ -216,28 +220,26 @@ button:active{
 
 <div class="logo">💳</div>
 
-<h1>Validador de BIN</h1>
+<h1>Validador BIN</h1>
 
 <div class="sub">
-Informações públicas e análise de verificação
+Consulta de BIN e informações de Apple Pay
 </div>
 
 <section class="box">
 
-<label for="bin">BIN do cartão</label>
+<label for="bin">Digite a BIN</label>
 
 <div class="form">
 
 <input
-  id="bin"
-  inputmode="numeric"
-  maxlength="8"
-  placeholder="Ex.: 424242"
-  autocomplete="off">
+ id="bin"
+ inputmode="numeric"
+ maxlength="8"
+ placeholder="Ex.: 424242"
+ autocomplete="off">
 
-<button id="go">
-Consultar
-</button>
+<button id="go">Consultar</button>
 
 </div>
 
@@ -246,8 +248,8 @@ Consultar
 <section id="output"></section>
 
 <div class="small">
-Este sistema consulta somente informações de BIN.
-Não informe número completo do cartão, validade, CVV,
+Use somente BINs de 6 a 8 dígitos.
+Não informe número completo de cartão, CVV,
 senha ou código SMS.
 </div>
 
@@ -256,6 +258,54 @@ senha ou código SMS.
 <script>
 
 const $ = id => document.getElementById(id);
+
+/*
+====================================================
+BASE DE VERIFICAÇÃO
+====================================================
+
+IMPORTANTE:
+
+Os registros abaixo são apenas exemplos.
+
+O site NÃO deve afirmar que uma BIN aceita SMS,
+aplicativo ou ligação sem uma fonte confiável.
+
+Para adicionar um registro confirmado, use:
+
+{
+  bin:"123456",
+  applePay:"Sim",
+  sms:"Confirmado",
+  app:"Não confirmado",
+  phone:"Não confirmado",
+  source:"Fonte confiável"
+}
+
+*/
+
+const verificationDatabase = {
+
+  /*
+  Exemplo de estrutura:
+
+  "123456":{
+    applePay:"Sim",
+    sms:"Confirmado",
+    app:"Não confirmado",
+    phone:"Não confirmado",
+    source:"Fonte/documentação"
+  }
+
+  */
+
+};
+
+/*
+====================================================
+FUNÇÕES
+====================================================
+*/
 
 function esc(v){
 
@@ -270,84 +320,145 @@ function esc(v){
 
 }
 
-function methodCard(icon,title,text){
+function status(value){
+
+  if(value === "Confirmado"){
+    return `<span class="badge confirmed">CONFIRMADO</span>`;
+  }
+
+  if(value === "Não confirmado"){
+    return `<span class="badge notconfirmed">NÃO CONFIRMADO</span>`;
+  }
+
+  return `<span class="badge unknown">DESCONHECIDO</span>`;
+
+}
+
+function method(icon,name,value,description){
 
   return `
+
     <div class="method">
 
       <div class="icon">${icon}</div>
 
-      <div>
-        <div class="method-title">${title}</div>
-        <div class="method-text">${text}</div>
+      <div class="method-content">
+
+        <div class="method-name">
+          ${name}
+        </div>
+
+        <div class="method-info">
+          ${description}
+        </div>
+
       </div>
 
-      <div class="badge">
-        NÃO DETERMINADO
-      </div>
+      ${status(value)}
 
     </div>
+
   `;
 
 }
 
+/*
+====================================================
+CONSULTA
+====================================================
+*/
+
 async function consult(){
 
-  const bin = $("bin").value.replace(/\D/g,"");
+  const bin =
+    $("bin").value.replace(/\D/g,"");
 
   if(bin.length < 6 || bin.length > 8){
 
     $("output").innerHTML = `
-      <div class="result error">
-        Digite uma BIN com 6 a 8 números.
+
+      <div class="card error">
+
+        Digite uma BIN válida com 6 a 8 números.
+
       </div>
+
     `;
 
     return;
   }
 
   $("output").innerHTML = `
-    <div class="result loading">
+
+    <div class="card loading">
+
       🔎 Consultando BIN...
+
     </div>
+
   `;
 
   try{
 
+    /*
+    Consulta informações públicas da BIN.
+    */
+
     const response = await fetch(
-      "https://cardbincheck.com/api/bin/" +
+      "https://lookup.binlist.net/" +
       encodeURIComponent(bin),
       {
-        method:"GET",
         headers:{
-          "Accept":"application/json"
+          "Accept-Version":"3"
         }
       }
     );
 
     if(!response.ok){
-      throw new Error("HTTP " + response.status);
+
+      throw new Error(
+        "API HTTP " + response.status
+      );
+
     }
 
-    const json = await response.json();
+    const d = await response.json();
 
-    if(!json.success || !json.data){
-      throw new Error("BIN não encontrada");
-    }
+    /*
+    Procura a BIN na nossa base de
+    informações confirmadas.
+    */
 
-    const d = json.data;
+    const verification =
+      verificationDatabase[bin] || {};
+
+    const applePay =
+      verification.applePay || "Desconhecido";
+
+    const sms =
+      verification.sms || "Desconhecido";
+
+    const app =
+      verification.app || "Desconhecido";
+
+    const phone =
+      verification.phone || "Desconhecido";
+
+    const source =
+      verification.source ||
+      "Nenhuma fonte cadastrada";
 
     $("output").innerHTML = `
 
-      <div class="result">
+      <div class="card">
 
-        <div class="section-title">
+        <div class="title">
           📊 Informações da BIN
         </div>
 
         <div class="row">
           <span>BIN</span>
-          <strong>${esc(d.bin || bin)}</strong>
+          <strong>${esc(bin)}</strong>
         </div>
 
         <div class="row">
@@ -357,81 +468,85 @@ async function consult(){
 
         <div class="row">
           <span>Tipo</span>
-          <strong>${esc(d.funding)}</strong>
+          <strong>${esc(d.type)}</strong>
         </div>
 
         <div class="row">
-          <span>Nível</span>
-          <strong>${esc(d.segment)}</strong>
-        </div>
-
-        <div class="row">
-          <span>Emissor</span>
-          <strong>${esc(d.issuer)}</strong>
+          <span>Banco / emissor</span>
+          <strong>${esc(d.bank?.name)}</strong>
         </div>
 
         <div class="row">
           <span>País</span>
-          <strong>${esc(d.country_name)}</strong>
+          <strong>${esc(d.country?.name)}</strong>
         </div>
 
       </div>
 
-      <div class="result">
 
-        <div class="section-title">
-          🔐 Verificação no Apple Wallet
+      <div class="card">
+
+        <div class="title">
+          🍎 Apple Pay
         </div>
 
-        <div class="info">
+        <div class="row">
 
-          A BIN não revela de forma confiável qual
-          método de autenticação será apresentado
-          pelo Apple Wallet para um cartão específico.
+          <span>Compatibilidade conhecida</span>
 
+          <strong>
+            ${esc(applePay)}
+          </strong>
+
+        </div>
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="title">
+          🔐 Método de verificação
         </div>
 
         <div class="methods">
 
-          ${methodCard(
+          ${method(
             "💬",
             "SMS",
-            "O envio de código por SMS não pode ser confirmado apenas pela BIN."
+            sms,
+            "Código enviado por mensagem"
           )}
 
-          ${methodCard(
-            "📞",
-            "Ligação telefônica",
-            "A necessidade de ligação também não é determinada pela BIN."
-          )}
-
-          ${methodCard(
+          ${method(
             "📱",
-            "Aplicativo do banco",
-            "A aprovação pelo aplicativo depende do emissor e do cartão."
+            "Aplicativo",
+            app,
+            "Aprovação no aplicativo do emissor"
           )}
 
-          ${methodCard(
-            "🔐",
-            "Outro método",
-            "O emissor pode utilizar outro processo de autenticação."
+          ${method(
+            "📞",
+            "Ligação",
+            phone,
+            "Confirmação por telefone"
           )}
 
         </div>
 
         <div class="info">
 
-          <strong>❓ Resultado:</strong><br><br>
-
-          Método de verificação:
-          <strong>não determinável pela BIN</strong>.
+          <strong>Fonte:</strong>
+          ${esc(source)}
 
           <br><br>
 
-          Para saber qual método será realmente oferecido,
-          é necessário iniciar a adição de um cartão próprio
-          ao Apple Wallet e verificar as opções apresentadas
-          pelo próprio Wallet ou pelo emissor.
+          ⚠️ O método de verificação não é
+          determinado somente pela BIN.
+
+          Quando não houver confirmação,
+          o resultado será mostrado como
+          <strong>DESCONHECIDO</strong>.
 
         </div>
 
@@ -445,13 +560,15 @@ async function consult(){
 
     $("output").innerHTML = `
 
-      <div class="result error">
+      <div class="card error">
 
         ❌ Não foi possível consultar essa BIN agora.
 
         <div class="info">
-          Verifique sua conexão com a internet e tente
-          novamente em alguns instantes.
+
+          A consulta pública da BIN não respondeu.
+          Tente novamente em alguns instantes.
+
         </div>
 
       </div>
@@ -462,15 +579,19 @@ async function consult(){
 
 }
 
-$("go").addEventListener("click",consult);
+$("go").addEventListener(
+  "click",
+  consult
+);
 
-$("bin").addEventListener("keydown",e=>{
-
-  if(e.key === "Enter"){
-    consult();
+$("bin").addEventListener(
+  "keydown",
+  e=>{
+    if(e.key === "Enter"){
+      consult();
+    }
   }
-
-});
+);
 
 </script>
 
