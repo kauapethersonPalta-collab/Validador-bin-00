@@ -1,0 +1,22 @@
+{
+  "424242": {
+    "scheme": "Visa",
+    "type": "Credit",
+    "category": "Standard",
+    "country": "Brasil",
+    "currency": "BRL",
+    "issuer": "Exemplo",
+    "institution": "Instituição de exemplo",
+    "institutionType": "Banco",
+    "institutionCode": "000",
+    "institutionStatus": "Não confirmado",
+    "product": "Cartão de crédito",
+    "applePay": "Desconhecido",
+    "applePaySource": "Não confirmado",
+    "sms": "Desconhecido",
+    "app": "Desconhecido",
+    "phone": "Desconhecido",
+    "source": "Registro de demonstração",
+    "updated": "2026-09-05"
+  }
+}
