@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#111827">
+<meta name="theme-color" content="#0f172a">
 <title>Validador BIN</title>
 
 <style>
@@ -17,42 +17,42 @@ body{
 }
 
 .app{
-  max-width:520px;
+  max-width:560px;
   margin:auto;
-  padding:24px 18px 40px
+  padding:24px 16px 45px
 }
 
 .logo{
   text-align:center;
-  font-size:42px;
-  margin:12px 0
+  font-size:46px;
+  margin:8px 0
 }
 
 h1{
   text-align:center;
-  margin:0 0 6px;
+  margin:0;
   font-size:28px
 }
 
 .sub{
   text-align:center;
   color:#94a3b8;
-  margin-bottom:24px
+  margin:7px 0 24px
 }
 
 .box,.result{
   background:#1e293b;
   border:1px solid #334155;
-  border-radius:18px;
+  border-radius:20px;
   padding:18px;
-  margin-bottom:14px
+  margin-bottom:15px
 }
 
 label{
   display:block;
   color:#cbd5e1;
   font-size:14px;
-  margin-bottom:8px
+  margin-bottom:9px
 }
 
 .form{
@@ -63,8 +63,8 @@ label{
 input{
   min-width:0;
   flex:1;
-  border:0;
-  border-radius:12px;
+  border:1px solid #475569;
+  border-radius:13px;
   padding:15px;
   font-size:18px;
   background:#0f172a;
@@ -72,11 +72,16 @@ input{
   outline:none
 }
 
+input:focus{
+  border-color:#94a3b8
+}
+
 button{
   border:0;
-  border-radius:12px;
-  padding:0 17px;
+  border-radius:13px;
+  padding:0 18px;
   font-weight:700;
+  font-size:15px;
   background:#fff;
   color:#111827
 }
@@ -85,10 +90,16 @@ button:active{
   transform:scale(.97)
 }
 
+.section-title{
+  font-size:19px;
+  font-weight:800;
+  margin-bottom:14px
+}
+
 .row{
   display:flex;
   justify-content:space-between;
-  gap:20px;
+  gap:15px;
   padding:12px 0;
   border-bottom:1px solid #334155
 }
@@ -105,35 +116,96 @@ button:active{
   text-align:right
 }
 
-.status{
-  padding:14px;
-  border-radius:13px;
-  margin-top:15px;
-  background:#334155;
-  line-height:1.5
-}
-
-.status b{
-  display:block;
-  margin-bottom:7px
-}
-
-.note{
-  font-size:13px;
-  color:#94a3b8;
-  line-height:1.5;
+.methods{
+  display:grid;
+  gap:10px;
   margin-top:15px
+}
+
+.method{
+  border:1px solid #475569;
+  border-radius:15px;
+  padding:14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:#172033
+}
+
+.icon{
+  width:42px;
+  height:42px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:22px;
+  background:#0f172a;
+  flex-shrink:0
+}
+
+.method-title{
+  font-weight:800;
+  margin-bottom:3px
+}
+
+.method-text{
+  color:#94a3b8;
+  font-size:13px;
+  line-height:1.35
+}
+
+.badge{
+  margin-left:auto;
+  padding:6px 9px;
+  border-radius:9px;
+  font-size:11px;
+  font-weight:800;
+  white-space:nowrap;
+  background:#334155;
+  color:#e2e8f0
+}
+
+.info{
+  margin-top:15px;
+  padding:14px;
+  border-radius:15px;
+  background:#172033;
+  color:#cbd5e1;
+  font-size:13px;
+  line-height:1.5
 }
 
 .error{
   color:#fecaca
 }
 
+.loading{
+  text-align:center;
+  color:#cbd5e1;
+  padding:10px
+}
+
 .small{
   font-size:12px;
   color:#64748b;
-  margin-top:16px;
-  text-align:center
+  line-height:1.5;
+  text-align:center;
+  margin-top:18px
+}
+
+@media(max-width:430px){
+  .form{
+    flex-direction:column
+  }
+
+  button{
+    height:48px
+  }
+
+  .badge{
+    font-size:10px
+  }
 }
 </style>
 </head>
@@ -147,7 +219,7 @@ button:active{
 <h1>Validador de BIN</h1>
 
 <div class="sub">
-Consulta informações públicas da BIN
+Informações públicas e análise de verificação
 </div>
 
 <section class="box">
@@ -157,11 +229,11 @@ Consulta informações públicas da BIN
 <div class="form">
 
 <input
-id="bin"
-inputmode="numeric"
-maxlength="8"
-placeholder="Ex.: 424242"
-autocomplete="off">
+  id="bin"
+  inputmode="numeric"
+  maxlength="8"
+  placeholder="Ex.: 424242"
+  autocomplete="off">
 
 <button id="go">
 Consultar
@@ -174,7 +246,9 @@ Consultar
 <section id="output"></section>
 
 <div class="small">
-Não informe número completo, validade, CVV ou código SMS.
+Este sistema consulta somente informações de BIN.
+Não informe número completo do cartão, validade, CVV,
+senha ou código SMS.
 </div>
 
 </main>
@@ -184,14 +258,37 @@ Não informe número completo, validade, CVV ou código SMS.
 const $ = id => document.getElementById(id);
 
 function esc(v){
+
   return String(v ?? "Não informado")
-    .replace(/[&<>"']/g,m=>({
-      "&":"&amp;",
-      "<":"&lt;",
-      ">":"&gt;",
-      '"':"&quot;",
-      "'":"&#039;"
-    }[m]));
+  .replace(/[&<>"']/g,m=>({
+    "&":"&amp;",
+    "<":"&lt;",
+    ">":"&gt;",
+    '"':"&quot;",
+    "'":"&#039;"
+  }[m]));
+
+}
+
+function methodCard(icon,title,text){
+
+  return `
+    <div class="method">
+
+      <div class="icon">${icon}</div>
+
+      <div>
+        <div class="method-title">${title}</div>
+        <div class="method-text">${text}</div>
+      </div>
+
+      <div class="badge">
+        NÃO DETERMINADO
+      </div>
+
+    </div>
+  `;
+
 }
 
 async function consult(){
@@ -200,14 +297,20 @@ async function consult(){
 
   if(bin.length < 6 || bin.length > 8){
 
-    $("output").innerHTML =
-      '<div class="result error">Digite uma BIN com 6 a 8 números.</div>';
+    $("output").innerHTML = `
+      <div class="result error">
+        Digite uma BIN com 6 a 8 números.
+      </div>
+    `;
 
     return;
   }
 
-  $("output").innerHTML =
-    '<div class="result">Consultando BIN…</div>';
+  $("output").innerHTML = `
+    <div class="result loading">
+      🔎 Consultando BIN...
+    </div>
+  `;
 
   try{
 
@@ -237,6 +340,10 @@ async function consult(){
     $("output").innerHTML = `
 
       <div class="result">
+
+        <div class="section-title">
+          📊 Informações da BIN
+        </div>
 
         <div class="row">
           <span>BIN</span>
@@ -268,26 +375,68 @@ async function consult(){
           <strong>${esc(d.country_name)}</strong>
         </div>
 
-        <div class="status">
+      </div>
 
-          <b>Apple Wallet</b>
+      <div class="result">
 
-          A BIN, sozinha, não permite determinar
-          de forma confiável qual método de verificação
-          o emissor oferecerá no Apple Wallet.
+        <div class="section-title">
+          🔐 Verificação no Apple Wallet
+        </div>
+
+        <div class="info">
+
+          A BIN não revela de forma confiável qual
+          método de autenticação será apresentado
+          pelo Apple Wallet para um cartão específico.
 
         </div>
 
-        <div class="note">
+        <div class="methods">
 
-          Os dados acima são informações de BIN.
-          Eles não confirmam se um cartão específico
-          está ativo, aprovado, desbloqueado ou elegível
-          para Apple Pay.
+          ${methodCard(
+            "💬",
+            "SMS",
+            "O envio de código por SMS não pode ser confirmado apenas pela BIN."
+          )}
+
+          ${methodCard(
+            "📞",
+            "Ligação telefônica",
+            "A necessidade de ligação também não é determinada pela BIN."
+          )}
+
+          ${methodCard(
+            "📱",
+            "Aplicativo do banco",
+            "A aprovação pelo aplicativo depende do emissor e do cartão."
+          )}
+
+          ${methodCard(
+            "🔐",
+            "Outro método",
+            "O emissor pode utilizar outro processo de autenticação."
+          )}
+
+        </div>
+
+        <div class="info">
+
+          <strong>❓ Resultado:</strong><br><br>
+
+          Método de verificação:
+          <strong>não determinável pela BIN</strong>.
+
+          <br><br>
+
+          Para saber qual método será realmente oferecido,
+          é necessário iniciar a adição de um cartão próprio
+          ao Apple Wallet e verificar as opções apresentadas
+          pelo próprio Wallet ou pelo emissor.
 
         </div>
 
       </div>
+
     `;
 
   }catch(error){
@@ -298,24 +447,29 @@ async function consult(){
 
       <div class="result error">
 
-        Não foi possível consultar essa BIN agora.
+        ❌ Não foi possível consultar essa BIN agora.
 
-        <div class="note">
-          Verifique sua conexão ou tente novamente
-          em alguns instantes.
+        <div class="info">
+          Verifique sua conexão com a internet e tente
+          novamente em alguns instantes.
         </div>
 
       </div>
+
     `;
+
   }
+
 }
 
 $("go").addEventListener("click",consult);
 
 $("bin").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){
+
+  if(e.key === "Enter"){
     consult();
   }
+
 });
 
 </script>
